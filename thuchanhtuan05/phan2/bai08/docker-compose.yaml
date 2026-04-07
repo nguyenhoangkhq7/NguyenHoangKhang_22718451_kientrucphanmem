@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  # Service 1: Backend Node.js
+  node-app:
+    build: .
+    container_name: node-backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql-db
+    environment:
+      - NODE_ENV=production
+
+  # Service 2: Cơ sở dữ liệu MySQL
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

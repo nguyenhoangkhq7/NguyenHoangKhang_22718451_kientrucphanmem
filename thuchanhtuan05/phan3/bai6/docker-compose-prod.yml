@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: app_prod
+    expose:
+      - "5000"
+    networks:
+      - prod_network
+    restart: always
+    environment:
+      FLASK_ENV: production
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx_prod
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    networks:
+      - prod_network
+    restart: always
+
+networks:
+  prod_network:
+    driver: bridge

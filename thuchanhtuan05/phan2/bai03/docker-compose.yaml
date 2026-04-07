@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  # Service 1: Cơ sở dữ liệu MySQL
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+
+  # Service 2: Giao diện quản lý phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: always
+    ports:
+      - "8081:80" # Yêu cầu chạy trên cổng 8081 của máy host
+    environment:
+      PMA_HOST: db # CỰC KỲ QUAN TRỌNG: Kết nối tới tên service "db" ở trên
+      PMA_PORT: 3306
+    depends_on:
+      - db # Đảm bảo MySQL khởi động trước phpMyAdmin

@@ -1,0 +1,103 @@
+version: "3.8"
+
+services:
+  # Frontend - Python voting interface
+  vote:
+    build: ./vote
+    container_name: voting_vote
+    ports:
+      - "5000:5000"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - voting_network
+    volumes:
+      - ./vote:/app
+
+  # Backend - Node.js results viewer
+  result:
+    build: ./result
+    container_name: voting_result
+    ports:
+      - "5001:5001"
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: votes
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - voting_network
+    volumes:
+      - ./result:/app
+
+  # Worker - Java service processing votes from Redis to PostgreSQL
+  worker:
+    build: ./worker
+    container_name: voting_worker
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: votes
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    networks:
+      - voting_network
+
+  # Redis - temporary vote storage
+  redis:
+    image: redis:7-alpine
+    container_name: voting_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - voting_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # PostgreSQL - persistent vote storage
+  db:
+    image: postgres:15-alpine
+    container_name: voting_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: votes
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - voting_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  voting_network:
+    driver: bridge

@@ -1,0 +1,8 @@
+services:
+  cache-server: # Tên service tùy chọn
+    image: redis:latest # Sử dụng image redis bản mới nhất từ Docker Hub
+    container_name: my-redis-container
+    restart: always
+    ports:
+      - "6379:6379" # Map cổng 6379 của máy host vào 6379 của container
+    # command: redis-server --appendonly yes # Tùy chọn: Bật chế độ lưu dữ liệu xuống ổ đĩa

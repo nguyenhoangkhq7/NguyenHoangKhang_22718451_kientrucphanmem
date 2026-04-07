@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: app_dev
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: development
+    networks:
+      - dev_network
+    command: python app.py
+
+  tests:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.test
+    container_name: app_tests
+    volumes:
+      - ./app:/app
+    depends_on:
+      - app
+    networks:
+      - dev_network
+    environment:
+      PYTHONUNBUFFERED: 1
+    # Keep container running to watch for changes
+    command: bash -c "while true; do pytest -v --cov=. --cov-report=term-missing 2>/dev/null; sleep 10; done"
+
+networks:
+  dev_network:
+    driver: bridge
