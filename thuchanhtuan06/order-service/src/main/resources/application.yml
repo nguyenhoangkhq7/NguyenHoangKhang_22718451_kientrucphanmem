@@ -1,0 +1,26 @@
+server:
+  port: 8083
+  address: 172.16.55.185 # TODO: Change this to your actual local LAN IPv4 address (e.g., 192.168.x.x)
+
+spring:
+  datasource:
+    url: jdbc:mysql://172.16.55.185:3306/order_db?createDatabaseIfNotExist=true&serverTimezone=UTC
+    username: root
+    password: password # TODO: Change to your MySQL password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Feign configuration
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
