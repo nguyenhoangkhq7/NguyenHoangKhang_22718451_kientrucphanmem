@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: tour-service
+
+server:
+  port: 8082
+
